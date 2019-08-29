@@ -13,50 +13,55 @@ int main()
     ofstream outputCSV;
     outputCSV.open("filteredAPRS.csv");
 
-    if(inputAPRS.fail())
-    {
+    if(inputAPRS.fail()){
         cout << "ERROR opening input file";
-        exit(0);
-    }
-    if(outputCSV.fail())
-    {
+        exit(0);}
+    if(outputCSV.fail()){
         cout << "ERROR opening output file";
-        exit(0);
-    }
+        exit(0);}
 
     string junk, comma;
-    int year, day, month, hour, minute, second, tempC, i=0;
+    int year, day, month, hour[500], minute[500], second[500], tempC[500], i=0, startHour, startMinute, startSecond;
     char dash, colon;
-    double lat, lon, alt;
+    double lat[500], lon[500], alt[500], flightMinutes[500];
 
-    outputCSV << "Month , Day , hour , minute , second , latitude , longitude , altitude (m) , temperature (C)\n";
-
-
+    outputCSV << "Month , Day , hour , minute , second , latitude , longitude , temperature (C) , altitude (ft), minutes into flight\n";
 
 while(!inputAPRS.eof()){
     getline(inputAPRS, junk, '-');
-    inputAPRS >> month >> dash >> day >> hour >> colon >> minute >> colon >> second;
+    inputAPRS >> month >> dash >> day >> hour[i] >> colon >> minute[i] >> colon >> second[i];
     getline(inputAPRS, junk, '!');
-    inputAPRS >> lat;
+    inputAPRS >> lat[i];
     getline(inputAPRS,junk,'/');
-    inputAPRS >> lon;
+    inputAPRS >> lon[i];
     getline(inputAPRS,junk, '=');
-    inputAPRS >> alt;
+    inputAPRS >> alt[i];
     getline(inputAPRS,junk,'V');
     getline(inputAPRS,junk,',');
-    inputAPRS >> tempC;
-
-    outputCSV << month << "," << day << "," << hour << "," << minute << "," << second << ","
-            << lat/100 << " , " << lon/100 << " , " << alt << " , " << tempC << "\n";
-    i++;
-
+    inputAPRS >> tempC[i];
+    if(i==1){
+        startHour = hour[i];
+        startMinute = minute[i];
+        startSecond = second [i];
     }
-
+    for(int k=0; k<i; k++)
+    {
+        if(alt[i]==alt[k])
+        {
+            //cout << alt[i];
+            break;
+        }
+        if(k==(i-1)){
+            flightMinutes[i] = ((hour[i]-startHour)*60)+(minute[i]-startMinute)+ ((second[i]-startSecond)/60);
+             //cout << i << endl;
+            outputCSV << month << "," << day << "," << hour[i] << "," << minute[i] << "," << second[i] << ","
+            << lat[i]/100 << " , " << lon[i]/100 << " , " << tempC[i] << " , " << alt[i] << "," << flightMinutes[i] << "\n";}
+    }
+    //cout << i;
+    i++;}
 
     inputAPRS.close();
     outputCSV.close();
 
     return(0);
-
-
 }
